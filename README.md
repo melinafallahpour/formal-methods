@@ -1,4 +1,4 @@
 Formal Methods in Software Engineering  <br>
 Final project (ATM) <br>
  <br>
- کد پروملا با کد NuSMV   <br>دوم  <br>(ATM_model2.smv)  <br>تطابق دارد
+ The Promela code is compatible with the second NuSMV code (ATM_model2.smv).
