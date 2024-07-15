@@ -1,0 +1,37 @@
+MODULE main
+VAR
+  balance : 0..2000; -- فرض می‌کنیم که بالانس بیشتر از 2000 نخواهد شد
+  step : 0..6; -- تعداد مراحل کاربر
+
+ASSIGN
+  init(balance) := 1000;
+  init(step) := 0;
+
+TRANS
+  case
+    -- مرحله 0: واریز 500
+    step = 0 : next(balance) = balance + 500;
+    -- مرحله 1: بررسی بالانس
+    step = 1 : next(balance) = balance;
+    -- مرحله 2: برداشت 300 (در صورت موجودی کافی)
+    step = 2 & balance >= 300 : next(balance) = balance - 300;
+    step = 2 & balance < 300 : next(balance) = balance;
+    -- مرحله 3: بررسی بالانس
+    step = 3 : next(balance) = balance;
+    -- مرحله 4: برداشت 1500 (در صورت موجودی کافی)
+    step = 4 & balance >= 1500 : next(balance) = balance - 1500;
+    step = 4 & balance < 1500 : next(balance) = balance;
+    -- مرحله 5: بررسی بالانس
+    step = 5 : next(balance) = balance;
+    -- مرحله 6: توقف عملیات
+    step = 6 : next(balance) = balance;
+    TRUE : next(balance) = balance;
+  esac &
+  case
+    step < 6 : next(step) = step + 1;
+    TRUE : next(step) = step;
+  esac;
+
+-- مشخصه‌های CTL
+SPEC AG (balance >= 0) -- همیشه مقدار بالانس باید بزرگتر یا مساوی صفر باشد
+SPEC AF (step = 6) -- در نهایت باید به مرحله 6 برسیم

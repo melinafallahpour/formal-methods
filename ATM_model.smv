@@ -1,0 +1,154 @@
+MODULE main
+
+VAR
+    request : {withdraw, balance_inquiry, fund_transfer, card_to_card_transfer, 
+               service_update, error, success, power_failure, data_center_failure,
+               authenticate, store_data, read_data, encrypt_data, decrypt_data,
+               card_inserted, card_ejected, pin_entered, transaction_processed};
+    response : {error, success, power_failure, data_center_failure};
+    hardware_event : {card_inserted, card_ejected, pin_entered, transaction_processed};
+    user_state : {idle, withdrawal, balance_inquiry, fund_transfer, card_to_card_transfer, success, error};
+    atm_state : {idle, processing, processed, error};
+    bank_employee_state : {idle, service_update};
+    hardware_state : {idle, card_inserted, card_ejected, pin_entered, transaction_processed};
+    software_state : {idle, authenticate, store_data, read_data, encrypt_data, decrypt_data};
+    security_state : {idle, monitoring};
+    power_management_state : {idle, power_failure};
+    data_center_management_state : {idle, data_center_failure};
+    maintenance_state : {idle, checking, updating, adding};
+    security_system_state : {idle, surveillance, managing_alarms};
+    database_state : {idle, storing, reading, encrypting, decrypting};
+    user_interface_state : {idle, withdrawal, balance_inquiry, fund_transfer, card_to_card_transfer};
+    authentication_state : {idle, authenticating};
+    encryption_state : {idle, encrypting, decrypting};
+
+ASSIGN
+    init(user_state) := idle;
+    init(atm_state) := idle;
+    init(bank_employee_state) := idle;
+    init(hardware_state) := idle;
+    init(software_state) := idle;
+    init(security_state) := idle;
+    init(power_management_state) := idle;
+    init(data_center_management_state) := idle;
+    init(maintenance_state) := idle;
+    init(security_system_state) := idle;
+    init(database_state) := idle;
+    init(user_interface_state) := idle;
+    init(authentication_state) := idle;
+    init(encryption_state) := idle;
+
+    next(user_state) := case
+        user_state = idle & request = withdraw : withdrawal;
+        user_state = idle & request = balance_inquiry : balance_inquiry;
+        user_state = idle & request = fund_transfer : fund_transfer;
+        user_state = idle & request = card_to_card_transfer : card_to_card_transfer;
+        user_state in {withdrawal, balance_inquiry, fund_transfer, card_to_card_transfer} & response = success : success;
+        user_state in {withdrawal, balance_inquiry, fund_transfer, card_to_card_transfer} & response = error : error;
+        user_state in {success, error} : idle;
+        TRUE : user_state;
+    esac;
+
+    next(atm_state) := case
+        atm_state = idle & request in {withdraw, balance_inquiry, fund_transfer, card_to_card_transfer} : processing;
+        atm_state = processing & response = success : processed;
+        atm_state = processing & response = error : error;
+        atm_state = processed : idle;
+        atm_state = error : idle;
+        TRUE : atm_state;
+    esac;
+
+    next(bank_employee_state) := case
+        bank_employee_state = idle : service_update;
+        bank_employee_state = service_update : idle;
+        TRUE : bank_employee_state;
+    esac;
+
+    next(hardware_state) := case
+        hardware_state = idle & hardware_event = card_inserted : card_inserted;
+        hardware_state = idle & hardware_event = card_ejected : card_ejected;
+        hardware_state = idle & hardware_event = pin_entered : pin_entered;
+        hardware_state = idle & hardware_event = transaction_processed : transaction_processed;
+        hardware_state in {card_inserted, card_ejected, pin_entered, transaction_processed} : idle;
+        TRUE : hardware_state;
+    esac;
+
+    next(software_state) := case
+        software_state = idle & request = authenticate : authenticate;
+        software_state = idle & request = store_data : store_data;
+        software_state = idle & request = read_data : read_data;
+        software_state = idle & request = encrypt_data : encrypt_data;
+        software_state = idle & request = decrypt_data : decrypt_data;
+        software_state in {authenticate, store_data, read_data, encrypt_data, decrypt_data} : idle;
+        TRUE : software_state;
+    esac;
+
+    next(security_state) := case
+        security_state = idle : monitoring;
+        security_state = monitoring : idle;
+        TRUE : security_state;
+    esac;
+
+    next(power_management_state) := case
+        power_management_state = idle & response = power_failure : power_failure;
+        power_management_state = power_failure : idle;
+        TRUE : power_management_state;
+    esac;
+
+    next(data_center_management_state) := case
+        data_center_management_state = idle & response = data_center_failure : data_center_failure;
+        data_center_management_state = data_center_failure : idle;
+        TRUE : data_center_management_state;
+    esac;
+
+    next(maintenance_state) := case
+        maintenance_state = idle : checking;
+        maintenance_state = checking : updating;
+        maintenance_state = updating : adding;
+        maintenance_state = adding : idle;
+        TRUE : maintenance_state;
+    esac;
+
+    next(security_system_state) := case
+        security_system_state = idle : surveillance;
+        security_system_state = surveillance : managing_alarms;
+        security_system_state = managing_alarms : idle;
+        TRUE : security_system_state;
+    esac;
+
+    next(database_state) := case
+        database_state = idle & request = store_data : storing;
+        database_state = idle & request = read_data : reading;
+        database_state = idle & request = encrypt_data : encrypting;
+        database_state = idle & request = decrypt_data : decrypting;
+        database_state in {storing, reading, encrypting, decrypting} : idle;
+        TRUE : database_state;
+    esac;
+
+    next(user_interface_state) := case
+        user_interface_state = idle & request = withdraw : withdrawal;
+        user_interface_state = idle & request = balance_inquiry : balance_inquiry;
+        user_interface_state = idle & request = fund_transfer : fund_transfer;
+        user_interface_state = idle & request = card_to_card_transfer : card_to_card_transfer;
+        user_interface_state in {withdrawal, balance_inquiry, fund_transfer, card_to_card_transfer} : idle;
+        TRUE : user_interface_state;
+    esac;
+
+    next(authentication_state) := case
+        authentication_state = idle & request = authenticate : authenticating;
+        authentication_state = authenticating : idle;
+        TRUE : authentication_state;
+    esac;
+
+    next(encryption_state) := case
+        encryption_state = idle & request = encrypt_data : encrypting;
+        encryption_state = idle & request = decrypt_data : decrypting;
+        encryption_state in {encrypting, decrypting} : idle;
+        TRUE : encryption_state;
+    esac;
+
+SPEC AG (user_state = success -> AX user_state = idle)
+SPEC AG (atm_state = processing -> AF atm_state = processed)
+SPEC AG (hardware_state = transaction_processed -> AX hardware_state = idle)
+SPEC AG (software_state = authenticate -> AX software_state = idle)
+SPEC AG (encryption_state = encrypting -> AX encryption_state = idle)
